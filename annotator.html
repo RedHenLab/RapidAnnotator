@@ -1,0 +1,180 @@
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="-1">
+	<meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+	<title>Red Hen Rapid Annotator</title>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<style>
+		body {
+			font: normal 14px Verdana, Arial, sans-serif;
+		}
+	</style>
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+	<script>
+		//First Add this to extend jQuery
+
+    $.extend({
+      getUrlVars: function(){
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for(var i = 0; i < hashes.length; i++)
+        {
+          hash = hashes[i].split('=');
+          vars.push(hash[0]);
+          vars[hash[0]] = hash[1];
+        }
+        return vars;
+      },
+      getUrlVar: function(name){
+        return $.getUrlVars()[name];
+      }
+    });
+
+    //Second call with this:
+    // Get object of URL parameters
+//    var allVars = $.getUrlVars();
+
+    // Getting URL var by its nam
+//    var byName = $.getUrlVar('name');
+		var listofimages = [];
+		var listofkeys = [];
+		var listofannotations = [];
+		var currentimage = "";
+		var lastimage;
+		var listofpreloadedimages = [];
+		var paramset = $.getUrlVar('paramset');
+		var imageset = $.getUrlVar('imageset');
+		var user = $.getUrlVar('user');
+
+		function preload(image) {
+			listofpreloadedimages.push(image);
+			if (image == "NO_FURTHER_IMAGES")
+			{
+				return;
+			}
+			$('<img id="' + image + '" />').attr('src',image).appendTo("#preload").css('display','none');
+		}
+
+		function shownextimage(annotation) {
+//			$("#lastpicture").empty();
+//			lastimage = currentimage;
+//			$("#lastfileinfo").text(lastimage);
+//			$("#lastannotation").text(annotation);
+//			$("#picture :first-child" ).appendTo("#lastpicture").css({
+//				'display': 'inherit',
+//				'height': 'auto', 
+//				'width': 'auto',
+//				'max-width': '200px',
+//				'max-height': '300px'
+//			});
+			$("#picture").empty();
+			$("#preload :first-child" ).appendTo("#picture").css({
+				'display': 'inherit',
+				'height': 'auto', 
+				'width': 'auto',
+				'max-width': '700px',
+				'max-height': '700px'
+			});
+			currentimage = listofpreloadedimages.shift();
+			if (currentimage == "NO_FURTHER_IMAGES")
+			{
+				$("#fileinfo").empty().append("<span style='font-weight: bold; color: red;'>No more images to annotate. Thank you!</span>");
+			}
+			else {
+				$("#fileinfo").text(currentimage);
+			}
+		}
+
+		function annotate(image, annotation) {
+			$.get('json_image_annotator.cgi?action=annotate&file=' + encodeURIComponent(image) + "&annotation=" + encodeURIComponent(annotation) + "&paramset=" + paramset + "&imageset=" + imageset + "&user=" + user);
+			preload(listofimages.shift());
+			shownextimage(annotation);
+		}
+
+		$(document).ready(function() {
+			$.getJSON('json_image_annotator.cgi?action=getparameters&parameterset=' + paramset, function (data) {
+				$.each(data, function (key, pair) {
+					for (var i in pair)
+					{
+						$("#annotation").append(i + ": " + pair[i] + "<br />");
+						listofkeys.push(i);
+						listofannotations[i] = pair[i];
+						$("#buttons").append('<button type="button" value="' + i + '" id="btn_' + i + '">' + pair[i] + '</button>');
+						$("#buttons").on('click', '#btn_' + i, function() {
+//							console.log(this);
+							annotate(currentimage, listofannotations[this.value]);
+						});
+					}
+				});
+			});
+			$.getJSON('json_image_annotator.cgi?action=getimagelist&imageset=' + imageset + "&paramset=" + paramset + "&user=" + user, function (data) {
+				listofimages = data.slice();
+				listofimages.push("NO_FURTHER_IMAGES");
+				preload(listofimages.shift());
+				preload(listofimages.shift());
+				preload(listofimages.shift());
+				preload(listofimages.shift());
+				shownextimage();
+			});
+			$(document).on('keyup', function(event) {
+				thekey = event.which.toString();
+				thekey = String.fromCharCode(thekey);
+				console.log(thekey);
+				if ($.inArray(thekey, listofkeys) >= 0)
+				{
+					annotate(currentimage, listofannotations[thekey]);
+					console.log("Bello " + thekey);
+					console.log(listofkeys);
+				}
+				else {console.log("Problem mit " + thekey);}
+			});
+		});
+
+	</script>
+
+
+</head>
+
+<body>
+
+	<h1>Red Hen Rapid Annotator</h1>
+<div id="buttons"></div>
+<div style="float:left;">
+<p>
+	<div id="annotation"></div>
+</p>
+
+<p>
+	<div style="width:220px;">
+	<span id="fileinfo" style="width:200px; word-wrap:break-word; display:inline-block;"></div>
+</p>
+<!-- This was a display of the last picture, its filename and its annotation in the left-hand pane. Could be extended to implement an undo functionality.
+<h3>Last image:</h3>
+<p>
+	<div id="lastpicture"></div>
+</p>
+
+<p>
+	<div id="lastfileinfo" style="width:200px;"></div>
+</p>
+<p>
+	<div id="lastannotation"></div>
+</p>
+-->
+</div>
+<p>
+		<div id="picture" style="float:left;"></div>
+</p>
+
+
+<div id="preload"></div>
+
+<div style="clear:both;"><p><br /><br />written 2016 by Peter Uhrig</p></div>
+</body>
+
+</html>

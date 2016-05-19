@@ -1,0 +1,87 @@
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Red Hen Rapid Annotator</title>
+	<style>
+		body {
+			font: normal 14px Verdana, Arial, sans-serif;
+		}
+		.mono {
+			font-family: monospace;
+		}
+		.warning {
+			color: red;
+		}
+	</style>
+</head>
+
+<body>
+
+	<h1>Red Hen Rapid Annotator</h1>
+
+<div>
+<h2><span class="warning">PLEASE READ, ACT AND THEN REMOVE THIS SECTION</span></h2>
+<span class="warning">You have to adapt this document so it reflects your setup. This document presumes you have the Red Hen Rapid Annotator installed on your webserver in a directory called <span class="mono">annotator.</span> If that is not the case, you will have to change a few more paths below. There are three things you definitely have to change, even if you just clone the annotator directory into your web server's document root:
+<ol>
+<li>Change YOURSERVER to the name of your server (e.g. "enterprise") in the text and, if necessary, to the fully qualified domain name (e.g. "enterprise.uni-erlangen.de") of your server in web addresses.</li>
+<li>Change YOURHTDOCS to the directory in which you store the data on the server (typically something like <span class="mono">/var/www/html</span>)</li>
+<li>Change YOURWEBSERVERUSER to the username under which the web server is running, typically something like <span class="mono">www-data</span> or <span class="mono">wwwrun</span>.</li>
+</ol>
+</span>
+
+<h2>Basic Setup</h2>
+<p>
+In order to prepare a dataset for the <i>Red Hen Rapid Annotator</i>, you need to go through three simple steps: data preparation, parameter setting and user notification.
+<h3>Data Preparation</h3>
+<p>
+The data needed for the <i>Red Hen Rapid Annotator</i> is a directory full of images in any of the following formats: JPG, PNG or GIF. The names of the images have to end with these extension. Other files in that directory are ignored by the software. Ideally, use a directory name in lower case without special characters or spaces. Underscores should be all right. A good example would be <span class="mono">uploaded_images</span>. The directory has to sit in <span class="mono">/YOURHTDOCS/annotator</span> on YOURSERVER and must be readable by user <span class="mono">YOURWEBSERVERUSER (TYPICALLY www-data)</span>.
+</p>
+<h3>Parameter Setting</h3>
+<p>
+To set the labels that can be used for annotation, create a file with the extension .param in the directory <span class="mono">/YOURHTDOCS/annotator/param_files</span> on YOURSERVER. Again, please use lower case and no special characters, so <span class="mono">gender.param</span> would be a good name. In that file, you need to have the key and the label separated by a tab character. [Please note that not all keys may work the way you expected. Thus with numbers, the keypad on the right-hand side of the keyboard may not work. Make sure you do some testing.] There is one line per label. So a simple file would look as follows:
+</p>
+<p>
+<pre>
+1	female
+2	male
+</pre>
+<p>
+This file also has to be readable by user <span class="mono">YOURWEBSERVERUSER (TYPICALLY www-data)</span>.
+</p>
+<p>
+<b>Hint:</b> Use an additional label such as <span class="mono">problem</span> so your annotators can skip an item where they feel they would have to ask you first. Like this, you can later take a look at the problematic cases in detail.
+</p>
+
+<h3>User Notification</h3>
+<p>
+You need to inform your users how to perform the annotation task. For this, it is important that you write detailed instruction as to how to understand the parameters you set up in the last step. Give examples of what to press when. Also guide them to the introduction at <a href="http://YOURSERVER/annotator">http://YOURSERVER/annotator</a> and let them know they have to read that beforehand.
+</p><p>
+You have to create a personal link for every user of the annotator. Annotators <b>must not </b> share their links as each annotator will be shown every picture only once. The link you have to assemble has the following format:
+</p>
+<p>
+<pre>http://YOURSERVER/annotator/annotator.html?paramset=[name_of_your_parameter_file_without_extension]&imageset=[name_of_your_image_directory]&user=[name_of_user]</pre>
+</p>
+So taking up our examples from above and assuming our user is called Donald Duck, we would create the following link:
+<pre>http://YOURSERVER/annotator/annotator.html?paramset=gender&imageset=uploaded_images&user=donaldduck</pre>
+<p>
+It is advisable you test the link you created by opening it in the browser, at least for the first user. It should display the first image of your collection and a list of labels in the top left corner. As long as you do not press any of the keys assigned to labels, no annotation should take place. Simply close the browser window and send the link to your user. For all other users it is sufficient to modify the user's name at the end of the link.
+</p>
+
+<h2>Collecting the results</h2>
+<p>
+The results are stored in <span class="mono">/YOURHTDOCS/annotator/annotation_results</span> on YOURSERVER. They are named according to the following naming convention: <span class="mono">[name_of_image_directory]_[name_of_your_parameter_file_without_extension]_[name_of_user].txt</span>, so in our example from above the file would be called <span class="mono">uploaded_images_gender_donaldduck.txt</span>. This file can also be accessed online at <span class="mono">http://YOURSERVER/annotator/annotation_results/uploaded_images_gender_donaldduck.txt</span>.
+The file format is one image per line with the label assigned by the annotator in the first column followed by tab character followed by the filename, as in the following example:
+</p>
+<pre>
+female	white_marble.jpg
+male	a_bust_i_found_on_the_internet.png
+</pre>
+
+</div>
+
+
+<div><p><br /><br /><br /><br />written 2016 by Peter Uhrig</p></div>
+</body>
+
+</html>
