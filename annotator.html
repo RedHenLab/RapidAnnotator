@@ -91,13 +91,13 @@
 		}
 
 		function annotate(image, annotation) {
-			$.get('json_image_annotator.cgi?action=annotate&file=' + encodeURIComponent(image) + "&annotation=" + encodeURIComponent(annotation) + "&paramset=" + paramset + "&imageset=" + imageset + "&user=" + user);
+			$.get('json_annotator.cgi?action=annotate&file=' + encodeURIComponent(image) + "&annotation=" + encodeURIComponent(annotation) + "&paramset=" + paramset + "&imageset=" + imageset + "&user=" + user);
 			preload(listofimages.shift());
 			shownextimage(annotation);
 		}
 
 		$(document).ready(function() {
-			$.getJSON('json_image_annotator.cgi?action=getparameters&parameterset=' + paramset, function (data) {
+			$.getJSON('json_annotator.cgi?action=getparameters&parameterset=' + paramset, function (data) {
 				$.each(data, function (key, pair) {
 					for (var i in pair)
 					{
@@ -112,7 +112,7 @@
 					}
 				});
 			});
-			$.getJSON('json_image_annotator.cgi?action=getimagelist&imageset=' + imageset + "&paramset=" + paramset + "&user=" + user, function (data) {
+			$.getJSON('json_annotator.cgi?action=getimagelist&imageset=' + imageset + "&paramset=" + paramset + "&user=" + user, function (data) {
 				listofimages = data.slice();
 				listofimages.push("NO_FURTHER_IMAGES");
 				preload(listofimages.shift());
