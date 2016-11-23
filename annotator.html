@@ -49,8 +49,24 @@
 		var listofpreloadedimages = [];
 		var paramset = $.getUrlVar('paramset');
 		var imageset = $.getUrlVar('imageset');
+		var random = $.getUrlVar('random');
 		var user = $.getUrlVar('user');
 
+		function shuffle(array) {
+			var currentIndex = array.length, temporaryValue, randomIndex;
+			// While there remain elements to shuffle...
+			while (0 !== currentIndex) {
+				// Pick a remaining element...
+				randomIndex = Math.floor(Math.random() * currentIndex);
+				currentIndex -= 1;
+				// And swap it with the current element.
+				temporaryValue = array[currentIndex];
+				array[currentIndex] = array[randomIndex];
+				array[randomIndex] = temporaryValue;
+			}
+			return array;
+		}
+		
 		function preload(image) {
 			listofpreloadedimages.push(image);
 			if (image == "NO_FURTHER_IMAGES")
@@ -114,6 +130,9 @@
 			});
 			$.getJSON('json_annotator.cgi?action=getimagelist&imageset=' + imageset + "&paramset=" + paramset + "&user=" + user, function (data) {
 				listofimages = data.slice();
+				if (random == "yes") {
+					listofimages = shuffle(listofimages);
+				}				
 				listofimages.push("NO_FURTHER_IMAGES");
 				preload(listofimages.shift());
 				preload(listofimages.shift());
