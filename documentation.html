@@ -67,7 +67,10 @@ So taking up our examples from above and assuming our user is called Donald Duck
 <p>
 It is advisable you test the link you created by opening it in the browser, at least for the first user. It should display the first image of your collection and a list of labels in the top left corner. As long as you do not press any of the keys assigned to labels, no annotation should take place. Simply close the browser window and send the link to your user. For all other users it is sufficient to modify the user's name at the end of the link.
 </p>
-
+<p>
+	You can switch on randomization by using the parameter <pre>random=yes</pre>. This will make sure users are presented with the items to annotate in random order.
+</p>
+	
 <h2>Collecting the results</h2>
 <p>
 The results are stored in <span class="mono">/YOURHTDOCS/annotator/annotation_results</span> on YOURSERVER. They are named according to the following naming convention: <span class="mono">[name_of_image_directory]_[name_of_your_parameter_file_without_extension]_[name_of_user].txt</span>, so in our example from above the file would be called <span class="mono">uploaded_images_gender_donaldduck.txt</span>. This file can also be accessed online at <span class="mono">http://YOURSERVER/annotator/annotation_results/uploaded_images_gender_donaldduck.txt</span>.
