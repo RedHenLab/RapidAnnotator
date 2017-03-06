@@ -6,14 +6,15 @@
 	<meta http-equiv="Expires" content="-1">
 	<meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
 	<title>Red Hen Rapid Annotator</title>
-	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 	<style>
 		body {
 			font: normal 14px Verdana, Arial, sans-serif;
 		}
 	</style>
-	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-	<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<script src="https://cdn.jsdelivr.net/hls.js/latest/hls.min.js"></script>
 
 	<script>
 		//First Add this to extend jQuery
@@ -68,12 +69,20 @@
 		}
 		
 		function preload(image) {
+			if (image === undefined) {
+				return;
+			}
 			listofpreloadedimages.push(image);
 			if (image == "NO_FURTHER_IMAGES")
 			{
 				return;
+			} else if (/^video\t(.*?)\t(.*)/.exec(image)) {
+				var name = (/^video\t(.*?)\t(.*)/.exec(image))[1];
+				var url = (/^video\t(.*?)\t(.*)/.exec(image))[2];
+				$('<video id="' + name + '" controls loop />').attr('name',name).attr('data-url',url).appendTo("#preload").css('display','none');
+				return;
 			}
-			$('<img id="' + image + '" />').attr('src',image).appendTo("#preload").css('display','none');
+			$('<img id="' + image + '" />').attr('src','image_files/' + image).appendTo("#preload").css('display','none');
 		}
 
 		function shownextimage(annotation) {
@@ -88,6 +97,11 @@
 //				'max-width': '200px',
 //				'max-height': '300px'
 //			});
+			$("#picture video").each(function(idx, videoElement) {
+				$(videoElement).off();
+				videoElement.src = '';
+				videoElement.play();
+			});
 			$("#picture").empty();
 			$("#preload :first-child" ).appendTo("#picture").css({
 				'display': 'inherit',
@@ -100,6 +114,21 @@
 			if (currentimage == "NO_FURTHER_IMAGES")
 			{
 				$("#fileinfo").empty().append("<span style='font-weight: bold; color: red;'>No more images to annotate. Thank you!</span>");
+			} else if (/^video\t(.*?)\t(.*)/.exec(currentimage)) {
+                                var name = (/^video\t(.*?)\t(.*)/.exec(currentimage))[1];
+				$("#fileinfo").text(name);
+				var videoElement = $('#picture video')[0];
+				if (videoElement != undefined) {
+					var url = $(videoElement).attr('data-url');
+					if (url != undefined) {
+						var hls = new Hls();
+						hls.loadSource(url);
+						hls.attachMedia(videoElement);
+						hls.on(Hls.Events.MANIFEST_PARSED,function() {
+							videoElement.play();
+						});
+					}
+				}
 			}
 			else {
 				$("#fileinfo").text(currentimage);
@@ -107,7 +136,20 @@
 		}
 
 		function annotate(image, annotation) {
-			$.get('json_annotator.cgi?action=annotate&file=' + encodeURIComponent(image) + "&annotation=" + encodeURIComponent(annotation) + "&paramset=" + paramset + "&imageset=" + imageset + "&user=" + user);
+			var name;
+			var time;
+			if (image.indexOf("video\t") === 0) {
+				var arr = image.split("\t");
+				name = arr[1];
+				var starttime = Number(arr[3]);
+				var reltime = Number($('#picture video')[0].currentTime);
+				time = starttime + reltime;
+			} else {
+				name = image;
+				time = undefined;
+			}
+				
+			$.get('json_annotator.cgi?action=annotate&file=' + encodeURIComponent(name) + "&annotation=" + encodeURIComponent(annotation) + "&paramset=" + paramset + "&imageset=" + imageset + "&user=" + user + (time != undefined ? ("&time=" + time) : ""));
 			preload(listofimages.shift());
 			shownextimage(annotation);
 		}
